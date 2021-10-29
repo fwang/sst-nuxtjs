@@ -1,0 +1,6 @@
+{
+  "name": "sst-nextjs",
+  "stage": "dev",
+  "region": "us-west-2",
+  "lint": true
+}

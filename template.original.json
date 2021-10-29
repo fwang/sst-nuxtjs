@@ -1,0 +1,2992 @@
+{
+  "Resources": {
+    "SSTMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/SSTMetadata"
+      }
+    },
+    "SiteAwsCliLayerAA2A8F93": {
+      "Type": "AWS::Lambda::LayerVersion",
+      "Properties": {
+        "Content": {
+          "S3Bucket": {
+            "Ref": "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3BucketAEADE8C7"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3VersionKeyE415415F"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3VersionKeyE415415F"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Description": "/opt/awscli/aws"
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/AwsCliLayer/Resource",
+        "aws:asset:path": "asset.e9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68.zip",
+        "aws:asset:property": "Content"
+      }
+    },
+    "SiteBucket978D4AEB": {
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/Bucket/Resource"
+      }
+    },
+    "SiteBucketPolicy45F6EBA1": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "SiteBucket978D4AEB"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "SiteBucket978D4AEB",
+                        "Arn"
+                      ]
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": [
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                    "Arn"
+                  ]
+                }
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SiteBucket978D4AEB",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SiteBucket978D4AEB",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Principal": {
+                "CanonicalUser": {
+                  "Fn::GetAtt": [
+                    "SiteDistributionOrigin1S3Origin76FD4338",
+                    "S3CanonicalUserId"
+                  ]
+                }
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "SiteBucket978D4AEB",
+                        "Arn"
+                      ]
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/Bucket/Policy/Resource"
+      }
+    },
+    "SiteBucketAutoDeleteObjectsCustomResource6B1A5EC1": {
+      "Type": "Custom::S3AutoDeleteObjects",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+            "Arn"
+          ]
+        },
+        "BucketName": {
+          "Ref": "SiteBucket978D4AEB"
+        }
+      },
+      "DependsOn": [
+        "SiteBucketPolicy45F6EBA1"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/Bucket/AutoDeleteObjectsCustomResource/Default"
+      }
+    },
+    "SiteLambdaCodeUpdaterHandlerServiceRoleE8C63AC2": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/LambdaCodeUpdaterHandler/ServiceRole/Resource"
+      }
+    },
+    "SiteLambdaCodeUpdaterHandlerServiceRoleDefaultPolicyA6C2B494": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3BucketFD142432"
+                    },
+                    "/",
+                    {
+                      "Fn::Select": [
+                        0,
+                        {
+                          "Fn::Split": [
+                            "||",
+                            {
+                              "Ref": "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3VersionKeyEAD2FF02"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Fn::Select": [
+                        1,
+                        {
+                          "Fn::Split": [
+                            "||",
+                            {
+                              "Ref": "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3VersionKeyEAD2FF02"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": "s3:*",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3Bucket5A27A905"
+                    },
+                    "/",
+                    {
+                      "Fn::Select": [
+                        0,
+                        {
+                          "Fn::Split": [
+                            "||",
+                            {
+                              "Ref": "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3VersionKey5CE7E16E"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Fn::Select": [
+                        1,
+                        {
+                          "Fn::Split": [
+                            "||",
+                            {
+                              "Ref": "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3VersionKey5CE7E16E"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": "s3:*",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3Bucket50FC93FC"
+                    },
+                    "/",
+                    {
+                      "Fn::Select": [
+                        0,
+                        {
+                          "Fn::Split": [
+                            "||",
+                            {
+                              "Ref": "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3VersionKey5A24937D"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Fn::Select": [
+                        1,
+                        {
+                          "Fn::Split": [
+                            "||",
+                            {
+                              "Ref": "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3VersionKey5A24937D"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": "s3:*",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3BucketF0F9C1AF"
+                    },
+                    "/",
+                    {
+                      "Fn::Select": [
+                        0,
+                        {
+                          "Fn::Split": [
+                            "||",
+                            {
+                              "Ref": "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3VersionKeyB36EE8DB"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Fn::Select": [
+                        1,
+                        {
+                          "Fn::Split": [
+                            "||",
+                            {
+                              "Ref": "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3VersionKeyB36EE8DB"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SiteLambdaCodeUpdaterHandlerServiceRoleDefaultPolicyA6C2B494",
+        "Roles": [
+          {
+            "Ref": "SiteLambdaCodeUpdaterHandlerServiceRoleE8C63AC2"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/LambdaCodeUpdaterHandler/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "SiteLambdaCodeUpdaterHandler9BECF4B0": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3BucketAED79086"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3VersionKeyBDFEA275"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3VersionKeyBDFEA275"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "SiteLambdaCodeUpdaterHandlerServiceRoleE8C63AC2",
+            "Arn"
+          ]
+        },
+        "Handler": "lambda-code-updater.handler",
+        "Layers": [
+          {
+            "Ref": "SiteAwsCliLayerAA2A8F93"
+          }
+        ],
+        "MemorySize": 1024,
+        "Runtime": "python3.7",
+        "Timeout": 900
+      },
+      "DependsOn": [
+        "SiteLambdaCodeUpdaterHandlerServiceRoleDefaultPolicyA6C2B494",
+        "SiteLambdaCodeUpdaterHandlerServiceRoleE8C63AC2"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/LambdaCodeUpdaterHandler/Resource",
+        "aws:asset:path": "asset.143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19d",
+        "aws:asset:property": "Code"
+      }
+    },
+    "SiteRegenerationQueue946B71BD": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "FifoQueue": true,
+        "QueueName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "SiteBucket978D4AEB"
+              },
+              ".fifo"
+            ]
+          ]
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/RegenerationQueue/Resource"
+      }
+    },
+    "SiteRegenerationLambdaCodeUpdaterDF8EBF07": {
+      "Type": "Custom::SSTLambdaCodeUpdater",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "SiteLambdaCodeUpdaterHandler9BECF4B0",
+            "Arn"
+          ]
+        },
+        "Source": {
+          "BucketName": {
+            "Ref": "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3BucketFD142432"
+          },
+          "ObjectKey": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3VersionKeyEAD2FF02"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3VersionKeyEAD2FF02"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "ReplaceValues": [
+          {
+            "files": "**/*.js",
+            "search": "\"{{ _SST_NEXTJS_SITE_ENVIRONMENT_ }}\"",
+            "replace": "{}"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/RegenerationLambdaCodeUpdater/Default"
+      }
+    },
+    "SiteRegenerationFunctionServiceRole00933BB6": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "DependsOn": [
+        "SiteRegenerationLambdaCodeUpdaterDF8EBF07"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/RegenerationFunction/ServiceRole/Resource"
+      }
+    },
+    "SiteRegenerationFunctionServiceRoleDefaultPolicy7892BFA2": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SiteRegenerationQueue946B71BD",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SiteBucket978D4AEB",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SiteBucket978D4AEB",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SiteRegenerationFunctionServiceRoleDefaultPolicy7892BFA2",
+        "Roles": [
+          {
+            "Ref": "SiteRegenerationFunctionServiceRole00933BB6"
+          }
+        ]
+      },
+      "DependsOn": [
+        "SiteRegenerationLambdaCodeUpdaterDF8EBF07"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/RegenerationFunction/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "SiteRegenerationFunction999203A6": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3BucketFD142432"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3VersionKeyEAD2FF02"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3VersionKeyEAD2FF02"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "SiteRegenerationFunctionServiceRole00933BB6",
+            "Arn"
+          ]
+        },
+        "Handler": "index.handler",
+        "Runtime": "nodejs12.x",
+        "Timeout": 30
+      },
+      "DependsOn": [
+        "SiteRegenerationFunctionServiceRoleDefaultPolicy7892BFA2",
+        "SiteRegenerationFunctionServiceRole00933BB6",
+        "SiteRegenerationLambdaCodeUpdaterDF8EBF07"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/RegenerationFunction/Resource",
+        "aws:asset:path": "asset.5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317",
+        "aws:asset:property": "Code"
+      }
+    },
+    "SiteRegenerationFunctionSqsEventSourcedevsstnextjsmystackSiteRegenerationQueueE7069F0134EBBEA4": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SiteRegenerationFunction999203A6"
+        },
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "SiteRegenerationQueue946B71BD",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "SiteRegenerationLambdaCodeUpdaterDF8EBF07"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/RegenerationFunction/SqsEventSource:devsstnextjsmystackSiteRegenerationQueueE7069F01/Resource"
+      }
+    },
+    "SiteMainLambdaCodeUpdaterA438EB52": {
+      "Type": "Custom::SSTLambdaCodeUpdater",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "SiteLambdaCodeUpdaterHandler9BECF4B0",
+            "Arn"
+          ]
+        },
+        "Source": {
+          "BucketName": {
+            "Ref": "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3Bucket5A27A905"
+          },
+          "ObjectKey": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3VersionKey5CE7E16E"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3VersionKey5CE7E16E"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "ReplaceValues": [
+          {
+            "files": "**/*.js",
+            "search": "\"{{ _SST_NEXTJS_SITE_ENVIRONMENT_ }}\"",
+            "replace": "{}"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/MainLambdaCodeUpdater/Default"
+      }
+    },
+    "SiteMainFunctionServiceRoleFDDD8403": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            },
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "edgelambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "DependsOn": [
+        "SiteMainLambdaCodeUpdaterA438EB52"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/MainFunction/ServiceRole/Resource"
+      }
+    },
+    "SiteMainFunctionServiceRoleDefaultPolicyF6751669": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SiteBucket978D4AEB",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SiteBucket978D4AEB",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SiteRegenerationQueue946B71BD",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SiteRegenerationFunction999203A6",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SiteMainFunctionServiceRoleDefaultPolicyF6751669",
+        "Roles": [
+          {
+            "Ref": "SiteMainFunctionServiceRoleFDDD8403"
+          }
+        ]
+      },
+      "DependsOn": [
+        "SiteMainLambdaCodeUpdaterA438EB52"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/MainFunction/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "SiteMainFunction17342A54": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3Bucket5A27A905"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3VersionKey5CE7E16E"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3VersionKey5CE7E16E"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "SiteMainFunctionServiceRoleFDDD8403",
+            "Arn"
+          ]
+        },
+        "Description": "Main handler for Next.js",
+        "Handler": "index.handler",
+        "MemorySize": 512,
+        "Runtime": "nodejs12.x",
+        "Timeout": 10
+      },
+      "DependsOn": [
+        "SiteMainFunctionServiceRoleDefaultPolicyF6751669",
+        "SiteMainFunctionServiceRoleFDDD8403",
+        "SiteMainLambdaCodeUpdaterA438EB52"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/MainFunction/Resource",
+        "aws:asset:path": "asset.d6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7",
+        "aws:asset:property": "Code"
+      }
+    },
+    "SiteMainFunctionLogRetentionA9BADEB1": {
+      "Type": "Custom::LogRetention",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn"
+          ]
+        },
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "SiteMainFunction17342A54"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 3
+      },
+      "DependsOn": [
+        "SiteMainLambdaCodeUpdaterA438EB52"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/MainFunction/LogRetention/Resource"
+      }
+    },
+    "SiteMainFunctionCurrentVersion138AA64100f5985796f181430b276cd180182e86": {
+      "Type": "AWS::Lambda::Version",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SiteMainFunction17342A54"
+        }
+      },
+      "DependsOn": [
+        "SiteMainLambdaCodeUpdaterA438EB52"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/MainFunction/CurrentVersion/Resource"
+      }
+    },
+    "SiteMainFunctionCurrentVersionAliaslive98D47141": {
+      "Type": "AWS::Lambda::Alias",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SiteMainFunction17342A54"
+        },
+        "FunctionVersion": {
+          "Fn::GetAtt": [
+            "SiteMainFunctionCurrentVersion138AA64100f5985796f181430b276cd180182e86",
+            "Version"
+          ]
+        },
+        "Name": "live"
+      },
+      "DependsOn": [
+        "SiteMainLambdaCodeUpdaterA438EB52"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/MainFunction/CurrentVersion/Aliaslive/Resource"
+      }
+    },
+    "SiteApiLambdaCodeUpdater664E0633": {
+      "Type": "Custom::SSTLambdaCodeUpdater",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "SiteLambdaCodeUpdaterHandler9BECF4B0",
+            "Arn"
+          ]
+        },
+        "Source": {
+          "BucketName": {
+            "Ref": "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3Bucket50FC93FC"
+          },
+          "ObjectKey": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3VersionKey5A24937D"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3VersionKey5A24937D"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "ReplaceValues": [
+          {
+            "files": "**/*.js",
+            "search": "\"{{ _SST_NEXTJS_SITE_ENVIRONMENT_ }}\"",
+            "replace": "{}"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ApiLambdaCodeUpdater/Default"
+      }
+    },
+    "SiteApiFunctionServiceRoleF4A906A3": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            },
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "edgelambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "DependsOn": [
+        "SiteApiLambdaCodeUpdater664E0633"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ApiFunction/ServiceRole/Resource"
+      }
+    },
+    "SiteApiFunctionServiceRoleDefaultPolicy54D5BAC2": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SiteBucket978D4AEB",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SiteBucket978D4AEB",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SiteRegenerationQueue946B71BD",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SiteRegenerationFunction999203A6",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SiteApiFunctionServiceRoleDefaultPolicy54D5BAC2",
+        "Roles": [
+          {
+            "Ref": "SiteApiFunctionServiceRoleF4A906A3"
+          }
+        ]
+      },
+      "DependsOn": [
+        "SiteApiLambdaCodeUpdater664E0633"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ApiFunction/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "SiteApiFunction5F34A346": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3Bucket50FC93FC"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3VersionKey5A24937D"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3VersionKey5A24937D"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "SiteApiFunctionServiceRoleF4A906A3",
+            "Arn"
+          ]
+        },
+        "Description": "Api handler for Next.js",
+        "Handler": "index.handler",
+        "MemorySize": 512,
+        "Runtime": "nodejs12.x",
+        "Timeout": 10
+      },
+      "DependsOn": [
+        "SiteApiFunctionServiceRoleDefaultPolicy54D5BAC2",
+        "SiteApiFunctionServiceRoleF4A906A3",
+        "SiteApiLambdaCodeUpdater664E0633"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ApiFunction/Resource",
+        "aws:asset:path": "asset.d89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3",
+        "aws:asset:property": "Code"
+      }
+    },
+    "SiteApiFunctionLogRetentionCB5D2440": {
+      "Type": "Custom::LogRetention",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn"
+          ]
+        },
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "SiteApiFunction5F34A346"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 3
+      },
+      "DependsOn": [
+        "SiteApiLambdaCodeUpdater664E0633"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ApiFunction/LogRetention/Resource"
+      }
+    },
+    "SiteApiFunctionCurrentVersion54CEDB68fb400e115472150512072e8a74949506": {
+      "Type": "AWS::Lambda::Version",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SiteApiFunction5F34A346"
+        }
+      },
+      "DependsOn": [
+        "SiteApiLambdaCodeUpdater664E0633"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ApiFunction/CurrentVersion/Resource"
+      }
+    },
+    "SiteApiFunctionCurrentVersionAliasliveDC6A8F68": {
+      "Type": "AWS::Lambda::Alias",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SiteApiFunction5F34A346"
+        },
+        "FunctionVersion": {
+          "Fn::GetAtt": [
+            "SiteApiFunctionCurrentVersion54CEDB68fb400e115472150512072e8a74949506",
+            "Version"
+          ]
+        },
+        "Name": "live"
+      },
+      "DependsOn": [
+        "SiteApiLambdaCodeUpdater664E0633"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ApiFunction/CurrentVersion/Aliaslive/Resource"
+      }
+    },
+    "SiteImageLambdaCodeUpdater3464F88F": {
+      "Type": "Custom::SSTLambdaCodeUpdater",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "SiteLambdaCodeUpdaterHandler9BECF4B0",
+            "Arn"
+          ]
+        },
+        "Source": {
+          "BucketName": {
+            "Ref": "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3BucketF0F9C1AF"
+          },
+          "ObjectKey": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3VersionKeyB36EE8DB"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3VersionKeyB36EE8DB"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "ReplaceValues": [
+          {
+            "files": "**/*.js",
+            "search": "\"{{ _SST_NEXTJS_SITE_ENVIRONMENT_ }}\"",
+            "replace": "{}"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ImageLambdaCodeUpdater/Default"
+      }
+    },
+    "SiteImageFunctionServiceRoleCD42FEF3": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            },
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "edgelambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "DependsOn": [
+        "SiteImageLambdaCodeUpdater3464F88F"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ImageFunction/ServiceRole/Resource"
+      }
+    },
+    "SiteImageFunctionServiceRoleDefaultPolicyEF8D2843": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SiteBucket978D4AEB",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SiteBucket978D4AEB",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SiteRegenerationQueue946B71BD",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SiteRegenerationFunction999203A6",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SiteImageFunctionServiceRoleDefaultPolicyEF8D2843",
+        "Roles": [
+          {
+            "Ref": "SiteImageFunctionServiceRoleCD42FEF3"
+          }
+        ]
+      },
+      "DependsOn": [
+        "SiteImageLambdaCodeUpdater3464F88F"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ImageFunction/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "SiteImageFunction6C3177FC": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3BucketF0F9C1AF"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3VersionKeyB36EE8DB"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3VersionKeyB36EE8DB"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "SiteImageFunctionServiceRoleCD42FEF3",
+            "Arn"
+          ]
+        },
+        "Description": "Image handler for Next.js",
+        "Handler": "index.handler",
+        "MemorySize": 512,
+        "Runtime": "nodejs12.x",
+        "Timeout": 10
+      },
+      "DependsOn": [
+        "SiteImageFunctionServiceRoleDefaultPolicyEF8D2843",
+        "SiteImageFunctionServiceRoleCD42FEF3",
+        "SiteImageLambdaCodeUpdater3464F88F"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ImageFunction/Resource",
+        "aws:asset:path": "asset.252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749",
+        "aws:asset:property": "Code"
+      }
+    },
+    "SiteImageFunctionLogRetention62D8F629": {
+      "Type": "Custom::LogRetention",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn"
+          ]
+        },
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "SiteImageFunction6C3177FC"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 3
+      },
+      "DependsOn": [
+        "SiteImageLambdaCodeUpdater3464F88F"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ImageFunction/LogRetention/Resource"
+      }
+    },
+    "SiteImageFunctionCurrentVersion1A45A076d0fea984a9402e94d2a65cb12aaec9fd": {
+      "Type": "AWS::Lambda::Version",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SiteImageFunction6C3177FC"
+        }
+      },
+      "DependsOn": [
+        "SiteImageLambdaCodeUpdater3464F88F"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ImageFunction/CurrentVersion/Resource"
+      }
+    },
+    "SiteImageFunctionCurrentVersionAliaslive0826DA62": {
+      "Type": "AWS::Lambda::Alias",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SiteImageFunction6C3177FC"
+        },
+        "FunctionVersion": {
+          "Fn::GetAtt": [
+            "SiteImageFunctionCurrentVersion1A45A076d0fea984a9402e94d2a65cb12aaec9fd",
+            "Version"
+          ]
+        },
+        "Name": "live"
+      },
+      "DependsOn": [
+        "SiteImageLambdaCodeUpdater3464F88F"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ImageFunction/CurrentVersion/Aliaslive/Resource"
+      }
+    },
+    "SiteS3UploaderServiceRole44D5D155": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/S3Uploader/ServiceRole/Resource"
+      }
+    },
+    "SiteS3UploaderServiceRoleDefaultPolicyB8D2BE10": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SiteBucket978D4AEB",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SiteBucket978D4AEB",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "AssetParameters94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441S3BucketEE00D9A6"
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "AssetParameters94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441S3BucketEE00D9A6"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SiteS3UploaderServiceRoleDefaultPolicyB8D2BE10",
+        "Roles": [
+          {
+            "Ref": "SiteS3UploaderServiceRole44D5D155"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/S3Uploader/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "SiteS3UploaderFFD523E8": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3BucketAED79086"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3VersionKeyBDFEA275"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3VersionKeyBDFEA275"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "SiteS3UploaderServiceRole44D5D155",
+            "Arn"
+          ]
+        },
+        "Handler": "s3-upload.handler",
+        "Layers": [
+          {
+            "Ref": "SiteAwsCliLayerAA2A8F93"
+          }
+        ],
+        "MemorySize": 1024,
+        "Runtime": "python3.7",
+        "Timeout": 900
+      },
+      "DependsOn": [
+        "SiteS3UploaderServiceRoleDefaultPolicyB8D2BE10",
+        "SiteS3UploaderServiceRole44D5D155"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/S3Uploader/Resource",
+        "aws:asset:path": "asset.143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19d",
+        "aws:asset:property": "Code"
+      }
+    },
+    "SiteS3HandlerServiceRoleC6C74D2E": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/S3Handler/ServiceRole/Resource"
+      }
+    },
+    "SiteS3HandlerServiceRoleDefaultPolicy11A86135": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SiteBucket978D4AEB",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SiteBucket978D4AEB",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SiteS3UploaderFFD523E8",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SiteS3HandlerServiceRoleDefaultPolicy11A86135",
+        "Roles": [
+          {
+            "Ref": "SiteS3HandlerServiceRoleC6C74D2E"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/S3Handler/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "SiteS3Handler5F76C26E": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3BucketAED79086"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3VersionKeyBDFEA275"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3VersionKeyBDFEA275"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "SiteS3HandlerServiceRoleC6C74D2E",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "UPLOADER_FUNCTION_NAME": {
+              "Ref": "SiteS3UploaderFFD523E8"
+            }
+          }
+        },
+        "Handler": "s3-handler.handler",
+        "Layers": [
+          {
+            "Ref": "SiteAwsCliLayerAA2A8F93"
+          }
+        ],
+        "MemorySize": 1024,
+        "Runtime": "python3.7",
+        "Timeout": 900
+      },
+      "DependsOn": [
+        "SiteS3HandlerServiceRoleDefaultPolicy11A86135",
+        "SiteS3HandlerServiceRoleC6C74D2E"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/S3Handler/Resource",
+        "aws:asset:path": "asset.143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19d",
+        "aws:asset:property": "Code"
+      }
+    },
+    "SiteS3Deployment00C6B5D8": {
+      "Type": "Custom::SSTBucketDeployment",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "SiteS3Handler5F76C26E",
+            "Arn"
+          ]
+        },
+        "Sources": [
+          {
+            "BucketName": {
+              "Ref": "AssetParameters94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441S3BucketEE00D9A6"
+            },
+            "ObjectKey": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Fn::Select": [
+                      0,
+                      {
+                        "Fn::Split": [
+                          "||",
+                          {
+                            "Ref": "AssetParameters94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441S3VersionKey35121814"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "Fn::Select": [
+                      1,
+                      {
+                        "Fn::Split": [
+                          "||",
+                          {
+                            "Ref": "AssetParameters94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441S3VersionKey35121814"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+          }
+        ],
+        "DestinationBucketName": {
+          "Ref": "SiteBucket978D4AEB"
+        },
+        "DestinationBucketKeyPrefix": "deploy-JG9CRHb7caO3gMxmSkf6i",
+        "FileOptions": [
+          [
+            "--exclude",
+            "*",
+            "--include",
+            "public/*",
+            "--cache-control",
+            "public,max-age=31536000,must-revalidate"
+          ],
+          [
+            "--exclude",
+            "*",
+            "--include",
+            "static/*",
+            "--cache-control",
+            "public,max-age=31536000,must-revalidate"
+          ],
+          [
+            "--exclude",
+            "*",
+            "--include",
+            "static-pages/*",
+            "--cache-control",
+            "public,max-age=0,s-maxage=2678400,must-revalidate"
+          ],
+          [
+            "--exclude",
+            "*",
+            "--include",
+            "_next/data/*",
+            "--cache-control",
+            "public,max-age=0,s-maxage=2678400,must-revalidate"
+          ],
+          [
+            "--exclude",
+            "*",
+            "--include",
+            "_next/static/*",
+            "--cache-control",
+            "public,max-age=31536000,immutable"
+          ]
+        ],
+        "ReplaceValues": []
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/S3Deployment/Default"
+      }
+    },
+    "SiteStaticsCache29AFAE7C": {
+      "Type": "AWS::CloudFront::CachePolicy",
+      "Properties": {
+        "CachePolicyConfig": {
+          "DefaultTTL": 2592000,
+          "MaxTTL": 2592000,
+          "MinTTL": 2592000,
+          "Name": "devsstnextjsmystackSiteStaticsCache714C5286-ca-central-1",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "none"
+            },
+            "EnableAcceptEncodingBrotli": true,
+            "EnableAcceptEncodingGzip": true,
+            "HeadersConfig": {
+              "HeaderBehavior": "none"
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "none"
+            }
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/StaticsCache/Resource"
+      }
+    },
+    "SiteImageCache3A336C80": {
+      "Type": "AWS::CloudFront::CachePolicy",
+      "Properties": {
+        "CachePolicyConfig": {
+          "DefaultTTL": 86400,
+          "MaxTTL": 31536000,
+          "MinTTL": 0,
+          "Name": "devsstnextjsmystackSiteImageCache606B3EF9-ca-central-1",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "none"
+            },
+            "EnableAcceptEncodingBrotli": true,
+            "EnableAcceptEncodingGzip": true,
+            "HeadersConfig": {
+              "HeaderBehavior": "whitelist",
+              "Headers": [
+                "Accept"
+              ]
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "all"
+            }
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ImageCache/Resource"
+      }
+    },
+    "SiteLambdaCacheD9743183": {
+      "Type": "AWS::CloudFront::CachePolicy",
+      "Properties": {
+        "CachePolicyConfig": {
+          "DefaultTTL": 0,
+          "MaxTTL": 31536000,
+          "MinTTL": 0,
+          "Name": "devsstnextjsmystackSiteLambdaCache30197F96-ca-central-1",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "all"
+            },
+            "EnableAcceptEncodingBrotli": true,
+            "EnableAcceptEncodingGzip": true,
+            "HeadersConfig": {
+              "HeaderBehavior": "none"
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "all"
+            }
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/LambdaCache/Resource"
+      }
+    },
+    "SiteImageOriginRequestFA9A64F5": {
+      "Type": "AWS::CloudFront::OriginRequestPolicy",
+      "Properties": {
+        "OriginRequestPolicyConfig": {
+          "CookiesConfig": {
+            "CookieBehavior": "none"
+          },
+          "HeadersConfig": {
+            "HeaderBehavior": "none"
+          },
+          "Name": "devsstnextjsmystackSiteImageOriginRequestEA1DAA2F",
+          "QueryStringsConfig": {
+            "QueryStringBehavior": "all"
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/ImageOriginRequest/Resource"
+      }
+    },
+    "SiteDistributionOrigin1S3Origin76FD4338": {
+      "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+      "Properties": {
+        "CloudFrontOriginAccessIdentityConfig": {
+          "Comment": "Identity for devsstnextjsmystackSiteDistributionOrigin189DD0182"
+        }
+      },
+      "DependsOn": [
+        "SiteS3Deployment00C6B5D8"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/Distribution/Origin1/S3Origin/Resource"
+      }
+    },
+    "SiteDistribution390DED28": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Aliases": [],
+          "CacheBehaviors": [
+            {
+              "AllowedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS",
+                "PUT",
+                "PATCH",
+                "POST",
+                "DELETE"
+              ],
+              "CachePolicyId": {
+                "Ref": "SiteImageCache3A336C80"
+              },
+              "CachedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS"
+              ],
+              "Compress": true,
+              "LambdaFunctionAssociations": [
+                {
+                  "EventType": "origin-request",
+                  "LambdaFunctionARN": {
+                    "Ref": "SiteImageFunctionCurrentVersion1A45A076d0fea984a9402e94d2a65cb12aaec9fd"
+                  }
+                }
+              ],
+              "OriginRequestPolicyId": {
+                "Ref": "SiteImageOriginRequestFA9A64F5"
+              },
+              "PathPattern": "_next/image*",
+              "TargetOriginId": "devsstnextjsmystackSiteDistributionOrigin189DD0182",
+              "ViewerProtocolPolicy": "redirect-to-https"
+            },
+            {
+              "AllowedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS"
+              ],
+              "CachePolicyId": {
+                "Ref": "SiteLambdaCacheD9743183"
+              },
+              "CachedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS"
+              ],
+              "Compress": true,
+              "LambdaFunctionAssociations": [
+                {
+                  "EventType": "origin-request",
+                  "IncludeBody": true,
+                  "LambdaFunctionARN": {
+                    "Ref": "SiteMainFunctionCurrentVersion138AA64100f5985796f181430b276cd180182e86"
+                  }
+                },
+                {
+                  "EventType": "origin-response",
+                  "LambdaFunctionARN": {
+                    "Ref": "SiteMainFunctionCurrentVersion138AA64100f5985796f181430b276cd180182e86"
+                  }
+                }
+              ],
+              "PathPattern": "_next/data/*",
+              "TargetOriginId": "devsstnextjsmystackSiteDistributionOrigin189DD0182",
+              "ViewerProtocolPolicy": "redirect-to-https"
+            },
+            {
+              "AllowedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS"
+              ],
+              "CachePolicyId": {
+                "Ref": "SiteStaticsCache29AFAE7C"
+              },
+              "CachedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS"
+              ],
+              "Compress": true,
+              "PathPattern": "_next/*",
+              "TargetOriginId": "devsstnextjsmystackSiteDistributionOrigin189DD0182",
+              "ViewerProtocolPolicy": "redirect-to-https"
+            },
+            {
+              "AllowedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS"
+              ],
+              "CachePolicyId": {
+                "Ref": "SiteStaticsCache29AFAE7C"
+              },
+              "CachedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS"
+              ],
+              "Compress": true,
+              "PathPattern": "static/*",
+              "TargetOriginId": "devsstnextjsmystackSiteDistributionOrigin189DD0182",
+              "ViewerProtocolPolicy": "redirect-to-https"
+            },
+            {
+              "AllowedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS",
+                "PUT",
+                "PATCH",
+                "POST",
+                "DELETE"
+              ],
+              "CachePolicyId": {
+                "Ref": "SiteLambdaCacheD9743183"
+              },
+              "CachedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS"
+              ],
+              "Compress": true,
+              "LambdaFunctionAssociations": [
+                {
+                  "EventType": "origin-request",
+                  "IncludeBody": true,
+                  "LambdaFunctionARN": {
+                    "Ref": "SiteApiFunctionCurrentVersion54CEDB68fb400e115472150512072e8a74949506"
+                  }
+                }
+              ],
+              "PathPattern": "api/*",
+              "TargetOriginId": "devsstnextjsmystackSiteDistributionOrigin189DD0182",
+              "ViewerProtocolPolicy": "redirect-to-https"
+            }
+          ],
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS"
+            ],
+            "CachePolicyId": {
+              "Ref": "SiteLambdaCacheD9743183"
+            },
+            "CachedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS"
+            ],
+            "Compress": true,
+            "LambdaFunctionAssociations": [
+              {
+                "EventType": "origin-request",
+                "IncludeBody": true,
+                "LambdaFunctionARN": {
+                  "Ref": "SiteMainFunctionCurrentVersion138AA64100f5985796f181430b276cd180182e86"
+                }
+              },
+              {
+                "EventType": "origin-response",
+                "LambdaFunctionARN": {
+                  "Ref": "SiteMainFunctionCurrentVersion138AA64100f5985796f181430b276cd180182e86"
+                }
+              }
+            ],
+            "TargetOriginId": "devsstnextjsmystackSiteDistributionOrigin189DD0182",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          "DefaultRootObject": "",
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "SiteBucket978D4AEB",
+                  "RegionalDomainName"
+                ]
+              },
+              "Id": "devsstnextjsmystackSiteDistributionOrigin189DD0182",
+              "OriginPath": "/deploy-JG9CRHb7caO3gMxmSkf6i",
+              "S3OriginConfig": {
+                "OriginAccessIdentity": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "origin-access-identity/cloudfront/",
+                      {
+                        "Ref": "SiteDistributionOrigin1S3Origin76FD4338"
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "DependsOn": [
+        "SiteS3Deployment00C6B5D8"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/Distribution/Resource"
+      }
+    },
+    "SiteCloudFrontInvalidatorServiceRoleDDAB0C91": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/CloudFrontInvalidator/ServiceRole/Resource"
+      }
+    },
+    "SiteCloudFrontInvalidatorServiceRoleDefaultPolicyE1A60DB3": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "cloudfront:GetInvalidation",
+                "cloudfront:CreateInvalidation"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SiteCloudFrontInvalidatorServiceRoleDefaultPolicyE1A60DB3",
+        "Roles": [
+          {
+            "Ref": "SiteCloudFrontInvalidatorServiceRoleDDAB0C91"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/CloudFrontInvalidator/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "SiteCloudFrontInvalidatorA6E15674": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3BucketAED79086"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3VersionKeyBDFEA275"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3VersionKeyBDFEA275"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "SiteCloudFrontInvalidatorServiceRoleDDAB0C91",
+            "Arn"
+          ]
+        },
+        "Handler": "cf-invalidate.handler",
+        "Layers": [
+          {
+            "Ref": "SiteAwsCliLayerAA2A8F93"
+          }
+        ],
+        "MemorySize": 1024,
+        "Runtime": "python3.7",
+        "Timeout": 900
+      },
+      "DependsOn": [
+        "SiteCloudFrontInvalidatorServiceRoleDefaultPolicyE1A60DB3",
+        "SiteCloudFrontInvalidatorServiceRoleDDAB0C91"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/CloudFrontInvalidator/Resource",
+        "aws:asset:path": "asset.143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19d",
+        "aws:asset:property": "Code"
+      }
+    },
+    "SiteCloudFrontInvalidationE37E8ADB": {
+      "Type": "Custom::SSTCloudFrontInvalidation",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "SiteCloudFrontInvalidatorA6E15674",
+            "Arn"
+          ]
+        },
+        "DeployId": "deploy-JG9CRHb7caO3gMxmSkf6i",
+        "DistributionId": {
+          "Ref": "SiteDistribution390DED28"
+        },
+        "DistributionPaths": [
+          "/*"
+        ]
+      },
+      "DependsOn": [
+        "SiteDistributionOrigin1S3Origin76FD4338",
+        "SiteDistribution390DED28"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Site/CloudFrontInvalidation/Default"
+      }
+    },
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+      }
+    },
+    "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters00f2465b209575c44977ca8ff1c81d86d002849272ede5a8a90ac87dfff1e494S3Bucket33B61C3E"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters00f2465b209575c44977ca8ff1c81d86d002849272ede5a8a90ac87dfff1e494S3VersionKeyDE2514FF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters00f2465b209575c44977ca8ff1c81d86d002849272ede5a8a90ac87dfff1e494S3VersionKeyDE2514FF"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Timeout": 900,
+        "MemorySize": 128,
+        "Handler": "__entrypoint__.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs12.x",
+        "Description": {
+          "Fn::Join": [
+            "",
+            [
+              "Lambda function for auto-deleting objects in ",
+              {
+                "Ref": "SiteBucket978D4AEB"
+              },
+              " S3 bucket."
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler"
+      }
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource"
+      }
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:PutRetentionPolicy",
+                "logs:DeleteRetentionPolicy"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+        "Roles": [
+          {
+            "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "index.handler",
+        "Runtime": "nodejs14.x",
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParametersb120b13d9d868c7622e7db1b68bae4c0f82ffd0227b8c15f2cef38e186ff3827S3Bucket2070BA0A"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersb120b13d9d868c7622e7db1b68bae4c0f82ffd0227b8c15f2cef38e186ff3827S3VersionKeyB95D17C3"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersb120b13d9d868c7622e7db1b68bae4c0f82ffd0227b8c15f2cef38e186ff3827S3VersionKeyB95D17C3"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "dev-sst-nextjs-my-stack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource"
+      }
+    }
+  },
+  "Parameters": {
+    "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3BucketAEADE8C7": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"e9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68\""
+    },
+    "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3VersionKeyE415415F": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"e9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68\""
+    },
+    "AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68ArtifactHashD9A515C3": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"e9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68\""
+    },
+    "AssetParameters00f2465b209575c44977ca8ff1c81d86d002849272ede5a8a90ac87dfff1e494S3Bucket33B61C3E": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"00f2465b209575c44977ca8ff1c81d86d002849272ede5a8a90ac87dfff1e494\""
+    },
+    "AssetParameters00f2465b209575c44977ca8ff1c81d86d002849272ede5a8a90ac87dfff1e494S3VersionKeyDE2514FF": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"00f2465b209575c44977ca8ff1c81d86d002849272ede5a8a90ac87dfff1e494\""
+    },
+    "AssetParameters00f2465b209575c44977ca8ff1c81d86d002849272ede5a8a90ac87dfff1e494ArtifactHashC2E6E6C0": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"00f2465b209575c44977ca8ff1c81d86d002849272ede5a8a90ac87dfff1e494\""
+    },
+    "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3BucketAED79086": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19d\""
+    },
+    "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dS3VersionKeyBDFEA275": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19d\""
+    },
+    "AssetParameters143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19dArtifactHashCDB18268": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"143c55b707e8a789cf0b416c7115705b2da2dd16608e0938b6e06ae3f905a19d\""
+    },
+    "AssetParameters94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441S3BucketEE00D9A6": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441\""
+    },
+    "AssetParameters94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441S3VersionKey35121814": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441\""
+    },
+    "AssetParameters94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441ArtifactHashCB5B1FC1": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"94cfd6b4d8b366460dc4fccc167eb3e975ff3b7405e5e071d49e99d63850f441\""
+    },
+    "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3BucketFD142432": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317\""
+    },
+    "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317S3VersionKeyEAD2FF02": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317\""
+    },
+    "AssetParameters5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317ArtifactHash8F954DB9": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"5e682b2e27022f051d1e9e229a6b638398170b5aa8665c6e31da7b39cc2a8317\""
+    },
+    "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3Bucket5A27A905": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"d6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7\""
+    },
+    "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7S3VersionKey5CE7E16E": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"d6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7\""
+    },
+    "AssetParametersd6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7ArtifactHash59D33F5E": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"d6e9eab43896efe1953a2c90560bfbfee7be9c5e2533a0782160bfac6f5426b7\""
+    },
+    "AssetParametersb120b13d9d868c7622e7db1b68bae4c0f82ffd0227b8c15f2cef38e186ff3827S3Bucket2070BA0A": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"b120b13d9d868c7622e7db1b68bae4c0f82ffd0227b8c15f2cef38e186ff3827\""
+    },
+    "AssetParametersb120b13d9d868c7622e7db1b68bae4c0f82ffd0227b8c15f2cef38e186ff3827S3VersionKeyB95D17C3": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"b120b13d9d868c7622e7db1b68bae4c0f82ffd0227b8c15f2cef38e186ff3827\""
+    },
+    "AssetParametersb120b13d9d868c7622e7db1b68bae4c0f82ffd0227b8c15f2cef38e186ff3827ArtifactHash1355580A": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"b120b13d9d868c7622e7db1b68bae4c0f82ffd0227b8c15f2cef38e186ff3827\""
+    },
+    "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3Bucket50FC93FC": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"d89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3\""
+    },
+    "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3S3VersionKey5A24937D": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"d89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3\""
+    },
+    "AssetParametersd89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3ArtifactHash279B7681": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"d89b7c2163de38aa127b1931fd1934ce710fbad7a60ee59419b3475743b57bb3\""
+    },
+    "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3BucketF0F9C1AF": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749\""
+    },
+    "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749S3VersionKeyB36EE8DB": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749\""
+    },
+    "AssetParameters252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749ArtifactHash40B9D85F": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"252d5c4b0429803b125e4d1aff09f0b08cef5b20f56c4566a457ca555107b749\""
+    }
+  },
+  "Outputs": {
+    "URL": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "SiteDistribution390DED28",
+                "DomainName"
+              ]
+            }
+          ]
+        ]
+      }
+    }
+  }
+}
